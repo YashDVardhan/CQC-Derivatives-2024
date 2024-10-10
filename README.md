@@ -11,3 +11,9 @@
 `run_backtester.ipynb` - jupyter notebook with framework to import your strategy and run backtester
 
 Note: allowed libraries include `numpy, matplotlib, seaborn, pandas, scipy, statsmodels`. Usage of machine and deep learning techniques is not permitted.
+
+# @Akshay @Pranav
+
+Use conda `conda env create -f environment.yml`
+
+This will setup the environment and you guys shouldn't have to install any additional packages.
