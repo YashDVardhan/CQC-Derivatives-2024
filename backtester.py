@@ -20,6 +20,7 @@ class Backtester:
     self.orders["minute"] = self.orders["datetime"].apply(lambda x: int(x.split("T")[1].split(".")[0].split(":")[1]))
     self.orders["expiration_date"] = self.orders["option_symbol"].apply(lambda x: self.get_expiration_date(x))
     self.orders["sort_by"] = pd.to_datetime(self.orders["datetime"])
+    self.orders["traded"] = "NO"
     self.orders = self.orders.sort_values(by="sort_by")
 
     self.options : pd.DataFrame = pd.read_csv("data/cleaned_options_data.csv")
@@ -70,6 +71,7 @@ class Backtester:
   def check_option_is_open(self, row: pd.Series) -> bool:
     same: pd.DataFrame = self.open_orders[(self.open_orders["option_symbol"] == row["option_symbol"]) 
                                           & (self.open_orders["datetime"] == row["datetime"])]
+    print(same)
     if len(same) > 0:
       assert len(same) == 1
       assert float(row["order_size"])
@@ -122,9 +124,11 @@ class Backtester:
           options_cost: float = order_size * ask_price
           margin: float = (ask_price + 0.1 * strike_price) * order_size
           if self.capital >= margin:
+            self.orders.at[row.name, "traded"] = "YES"
             self.capital -= options_cost + 0.5
             self.portfolio_value += order_size * ask_price
             if not self.check_option_is_open(row):
+              print(row)
               self.open_orders.loc[len(self.open_orders)] = row
         else:
           row["hour"] = min(row["hour"], 16)
@@ -137,10 +141,12 @@ class Backtester:
 
           margin : float = 100 * order_size * (buy_price + 0.1 * price)
           if self.capital >= margin:
+            self.orders.at[row.name, "traded"] = "YES"
             self.capital += order_size * buy_price * 100
             self.capital -= sold_stock_cost + 0.5
             self.portfolio_value += sold_stock_cost
             if not self.check_option_is_open(row):
+              print(row)
               self.open_orders.loc[len(self.open_orders)] = row
 
       for _, order in self.open_orders.iterrows():
