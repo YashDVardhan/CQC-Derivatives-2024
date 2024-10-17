@@ -18,7 +18,7 @@ class Strategy:
     self.underlying.columns = self.underlying.columns.str.lower()
 
   def generate_orders(self) -> pd.DataFrame:
-    return pd.read_csv("data/orders.csv").head(100)
+    return pd.read_csv("data/orders.csv").head(10000)
     # orders = []
     # num_orders = 1000
     
