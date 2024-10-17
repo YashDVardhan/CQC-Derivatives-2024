@@ -13,7 +13,7 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
     ask_pointer = len(concatenated_df) - 1
     
     # display(concatenated_df)
-    
+    curr_bid_amt, curr_ask_amt = 0, 0
     while bid_pointer < len(concatenated_df) and ask_pointer >= 0:
         if concatenated_df.at[bid_pointer, 'bid_px_00'] < concatenated_df.at[ask_pointer, 'ask_px_00'] + 0.75:
             break
@@ -29,20 +29,18 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
             #     continue
             
             pnl = (concatenated_df.at[bid_pointer, 'bid_px_00'] - concatenated_df.at[ask_pointer, 'ask_px_00']) * min(order_size, 100) * 100
-            if bid_size > ask_size:
-                concatenated_df.at[bid_pointer, 'bid_sz_00'] -= order_size
-                ask_pointer -= 1
-            elif bid_size < ask_size:
-                concatenated_df.at[ask_pointer, 'ask_sz_00'] -= order_size
-                bid_pointer -= 1
-            else:
-                concatenated_df.at[bid_pointer, 'bid_sz_00'] -= order_size
-                concatenated_df.at[ask_pointer, 'ask_sz_00'] -= order_size
-                bid_pointer -= 1
-                ask_pointer -= 1
                         
             if order_size > 0:
                 order_size = min(order_size, 100)
+                
+                curr_bid_amt += order_size
+                curr_ask_amt += order_size
+
+                if curr_bid_amt >= 100:
+                    bid_pointer -= 1
+                    curr_bid_amt = 0
+                    continue
+                
                 orders.append({
                     "datetime" : best_bid.at[curr_bid, 'ts_recv'],
                     "option_symbol" : best_bid.at[curr_bid, 'symbol'],
@@ -57,6 +55,26 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
                     "order_size" : order_size,
                     "pnl" : pnl
                 })
+
+                
+
+            if bid_size > ask_size:
+                concatenated_df.at[bid_pointer, 'bid_sz_00'] -= order_size
+                ask_pointer -= 1
+                curr_ask_amt = 0
+            elif bid_size < ask_size:
+                concatenated_df.at[ask_pointer, 'ask_sz_00'] -= order_size
+                bid_pointer -= 1
+                curr_bid_amt = 0
+            else:
+                concatenated_df.at[bid_pointer, 'bid_sz_00'] -= order_size
+                concatenated_df.at[ask_pointer, 'ask_sz_00'] -= order_size
+                bid_pointer -= 1
+                ask_pointer -= 1
+                curr_bid_amt = 0
+                curr_ask_amt = 0
+
+
                 
                 
     return orders
