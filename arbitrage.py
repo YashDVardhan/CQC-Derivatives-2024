@@ -33,10 +33,9 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
             if order_size > 0:
                 order_size = min(order_size, 100)
                 
-                curr_bid_amt += order_size
-                curr_ask_amt += order_size
+                curr_bid_amt += order_size * concatenated_df.at[bid_pointer, 'bid_px_00']
 
-                if curr_bid_amt >= 100:
+                if curr_bid_amt >= 200000:
                     bid_pointer -= 1
                     curr_bid_amt = 0
                     continue
@@ -56,8 +55,7 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
                     "pnl" : pnl
                 })
 
-                
-
+            
             if bid_size > ask_size:
                 concatenated_df.at[bid_pointer, 'bid_sz_00'] -= order_size
                 ask_pointer -= 1
