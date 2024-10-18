@@ -33,12 +33,12 @@ def find_arbitrage(instrument_data: pd.DataFrame) -> list:
             if order_size > 0:
                 order_size = min(order_size, 100)
                 
-                curr_bid_amt += order_size * concatenated_df.at[bid_pointer, 'bid_px_00']
+                # curr_bid_amt += order_size * concatenated_df.at[bid_pointer, 'bid_px_00']
 
-                if curr_bid_amt >= 200000:
-                    bid_pointer -= 1
-                    curr_bid_amt = 0
-                    continue
+                # if curr_bid_amt >= 200000:
+                #     bid_pointer -= 1
+                #     curr_bid_amt = 0
+                #     continue
                 
                 orders.append({
                     "datetime" : best_bid.at[curr_bid, 'ts_recv'],
